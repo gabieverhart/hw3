@@ -1,0 +1,81 @@
+---
+author: Gabi Everhart
+layout: page
+title: multivariate models
+---
+
+For this assignment will be analyzing data on the Vegetation
+and Environment in Dutch Dune Meadows.
+
+To import the data and read the metadata run the following:
+
+```{r}
+library(vegan)
+data(dune)
+data(dune.env)
+?dune
+```
+
+1.1 Conduct an indirect ordination on the dune plant community. Specifically,
+visually examine a NMDS plot using the bray-curtis distance metric. Below is 
+some code to help you develop a potential plot that emphasizes the role of the
+environmental variable "Moisture". Describe how you interpret the
+graphic. What is the goal of creating such a plot? Does this analysis suggest
+any interesting findings with respect to the dune vegetation?
+
+1.2 The graphic is interpreted through a color ordinance. The specific colored dots represent the moisture of a specific location based off of the axis. The goal of creating a plot is to physically show the distribution of the variance of dunes and their moisture and then compare them to one another. By looking at a species and then the moisure at the location, different species can be compared based off of similarities in where they are found. It shows that at a specific destination and variance, the dunes moisture levels are recorded and coded in color and from there you can match the species variance 
+
+```{r}
+dune_mds= metaMDS(dune)
+
+```
+
+```{r}
+    plot(dune_mds, type='n')
+    text(dune_mds, 'sp', cex=.5)
+    # generate vector of colors 
+    color_vect = rev(terrain.colors(6))[-1]
+    points(dune_mds, 'sites', pch=19, 
+           col=color_vect[dune.env$Moisture])
+    legend('topright', paste("Moisture =", 1:5, sep=''), 
+           col=color_vect, pch=19)
+```
+
+2. Carry out a direct ordination using CCA in order to test any potential 
+hypotheses that you developed after examining the MDS plot. Specifically,
+carry out a test of the entire model (i.e., including all constrained axes)
+and also carry out tests at the scale of individual explanatory variables
+you included in your model if you included more than one variable. Plot your 
+results.
+
+```{r}
+rda_dune = rda(dune ~ . , data=dune.env)
+rda_dune
+RsquareAdj(rda_dune)
+
+```
+
+```{r}
+cca_dune = cca(dune ~ ., data=dune.env)
+RsquareAdj(cca_dune, 100)
+anova(cca_dune, permutations = 999)
+anova(rda_dune, permutations=10)
+```
+
+```{r}
+anova(cca_dune, by= 'margin' , permutations = 999)
+
+```
+
+```{r}
+plot(cca_dune, type='n', scaling=1)
+orditorp(cca_dune, display='sp', cex=0.5, scaling=1, col='blue')
+text(cca_dune, display='bp', col='red')
+
+```
+
+3. Do your two analyses agree with one another or complement one another or do
+these two analyses seem to be suggesting different take home messages? Which
+analysis do you find to be more useful?
+
+-yes and no. The data in both analyses are still dynamic in terms of the variable changing by variance at the axes. However, the two graphs have the data backwards from one another. The first graph has a specific group of species on the right with variance and moisture increasing, and the second graph has them on the left with moisture.L decreasing and moisture.q and moisture.c going upwards still in the left direction. I find the second analysis most useful because it has all of the variables and variance levels on the same graph and well labeled. The first only displays moisture and variance to the eye by "minimizing stress". Which if in a time crunch it would be more efficient to look at the CCA graph(second) opposed to the NMDS graph(first). Looking at the r values from the data sets, it can also be seen that the parsimony is imbalanced.
