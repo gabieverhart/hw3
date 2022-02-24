@@ -1,0 +1,98 @@
+---
+Title: 'Spatial Modeling Assignment'
+Author: 'Gabi Everhart'
+output:
+  pdf_document: default
+  word_document: default
+  html_document: default
+  ---
+  
+
+```{r}
+library(vegan)
+data(BCI)
+## UTM Coordinates (in metres)
+BCI_xy = data.frame(x = rep(seq(625754, 626654, by=100), each=5), 
+                    y = rep(seq(1011569,  1011969, by=100), len=50))
+```
+
+```{r}
+sr <- rowSums(BCI > 0)
+hist(sr)
+```
+```{r}
+
+sr_dist <- dist(sr)
+xy_dist <- dist(BCI_xy)
+max_dist <- max(xy_dist) / 2
+
+
+plot(xy_dist, sr_dist)
+abline(lm(sr_dist ~ xy_dist), lwd=3, col='red')
+lines(lowess(xy_dist, sr_dist), lwd=3, col='pink')
+abline(v = max_dist, col='red', lwd=3, lty=2)
+```
+```{r}
+abu <- colSums(BCI)
+quantile(log10(abu))
+plot(density(log10(abu)))
+```
+```{r}
+which(abu > 25 & abu < 26)
+which(abu > 25 & abu < 27)
+```
+```{r}
+rare_sp <- BCI[ ,65]
+comm_sp <- BCI[ ,58]
+plot(BCI_xy, cex = rare_sp / max(rare_sp))
+plot(BCI_xy, cex = comm_sp / max(comm_sp))
+```
+
+```{r}
+geod <- dist(BCI_xy)
+rared <- dist(rare_sp)
+commd <- dist(comm_sp)
+
+```
+
+```{r}
+par(mfrow=c(1,2))
+plot(geod, rared, main = 'rare species')
+lines(lowess(geod, rared), lwd = 2, col= 'red')
+plot(geod, commd, main = 'common species')
+lines(lowess(geod, commd), lwd = 2, col= 'red')
+```
+
+1) Examine if there is evidence of spatial dependence in a rare and a common
+species in the BCI tree dataset
+-The common species are spread further apart because they have more geographical distributon between them. However, the rare species are closer together in the distribution therefor telling that the rare species,Erythrina costaricensis and         Inga acuminata, have a much higher spatial dependence than the common species Sterculia apetala and Symphonia globulifera would.
+
+
+2) Build two generalized linear models to predict the abundance of the species
+*Drypetes standleyi* using the abundance of other tree species in the study site.
+Specifically examine the following species as predictor variables:
+
+```{r}
+sp_ids = c("Cordia.lasiocalyx", "Hirtella.triandra",
+           "Picramnia.latifolia", "Quassia.amara",
+           "Tabernaemontana.arborea", "Trattinnickia.aspera", 
+           "Xylopia.macrantha")
+```
+Note renaming the species ids to something a little easier to work with like
+"sp_a", "sp_b" will make model construction a little less cumbersome
+
+* Model 1: only include a single species as a predictor variable
+
+* Model 2: include all of the species as predictor variables
+
+With both models examine the spatial dependence of the residuals using the 
+function `Variogram`. Model the spatial dependence in the residuals using one
+of the error structures available. 
+
+* Did including the spatial error term have a large impact on the coefficients
+of the model?
+
+* Did including the spatial error terms significantly improve model fit (use 
+function `anova` to carry out model comparison)?
+
+* Explain why you did or did not observe a difference in the influence of adding the spatial error term between the two models.
