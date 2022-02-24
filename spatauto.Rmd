@@ -1,11 +1,11 @@
 ---
-Title: 'Spatial Modeling Assignment'
-Author: 'Gabi Everhart'
-output:
+ Title: 'Spatial Modeling Assignment'
+ Author: 'Gabi Everhart'
+ output:
   pdf_document: default
   word_document: default
   html_document: default
-  ---
+---
   
 
 ```{r}
