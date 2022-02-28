@@ -1,7 +1,7 @@
 ---
- Title: 'Spatial Modeling Assignment'
- Author: 'Gabi Everhart'
- output:
+Title: 'Spatial Modeling Assignment'
+Author: 'Gabi Everhart'
+output:
   pdf_document: default
   word_document: default
   html_document: default
@@ -15,7 +15,9 @@ data(BCI)
 BCI_xy = data.frame(x = rep(seq(625754, 626654, by=100), each=5), 
                     y = rep(seq(1011569,  1011969, by=100), len=50))
 ```
-
+1) Examine if there is evidence of spatial dependence in a rare and a common
+species in the BCI tree dataset
+-The common species are spread further apart because they have more geographical distributon between them. However, the rare species are closer together in the distribution therefor telling that the rare species,Erythrina costaricensis and         Inga acuminata, have a much higher spatial dependence than the common species Sterculia apetala and Symphonia globulifera would.
 ```{r}
 sr <- rowSums(BCI > 0)
 hist(sr)
@@ -63,11 +65,12 @@ plot(geod, commd, main = 'common species')
 lines(lowess(geod, commd), lwd = 2, col= 'red')
 ```
 
-1) Examine if there is evidence of spatial dependence in a rare and a common
-species in the BCI tree dataset
--The common species are spread further apart because they have more geographical distributon between them. However, the rare species are closer together in the distribution therefor telling that the rare species,Erythrina costaricensis and         Inga acuminata, have a much higher spatial dependence than the common species Sterculia apetala and Symphonia globulifera would.
-
-
+```{r}
+rare_corlog = mantel.correlog(rared, BCI_xy)
+comm_corlog = mantel.correlog(commd, BCI_xy)
+rare_corlog
+comm_corlog
+```
 2) Build two generalized linear models to predict the abundance of the species
 *Drypetes standleyi* using the abundance of other tree species in the study site.
 Specifically examine the following species as predictor variables:
@@ -77,11 +80,51 @@ sp_ids = c("Cordia.lasiocalyx", "Hirtella.triandra",
            "Picramnia.latifolia", "Quassia.amara",
            "Tabernaemontana.arborea", "Trattinnickia.aspera", 
            "Xylopia.macrantha")
+
+sp_cord <- "Cordia.lasiocalyx"
+sp_hirt <- "Hirtella.triandra"
+sp_pic <- "Picramnia.lotifolia"
+sp_quas <- "Quassia.amara"
+sp_tab <- "Tabernaemontana.arborea"
+sp_trat <- "Trattinnickia.aspera"
+sp_xyl <- "Xylopia.macrantha"
+sp_dry <- "Drypetes.standleyi"
+```
+
+```{r}
+library(nlme)
+names(BCI)
+
+pred_sp <- BCI[ , sp_ids]
+mod_abu <- colSums(pred_sp)
+resp_sp <- BCI[ , "Drypetes.standleyi"]
+
+
+sp_a <- BCI$Cordia.lasiocalyx
+sp_b <- BCI$Hirtella.triandra
+sp_c <- BCI$Picramnia.latifolia
+sp_d <- BCI$Quassia.amara
+sp_e <- BCI$Tabernaemontana.arborea
+sp_f <- BCI$Trattinnickia.aspera
+sp_g <- BCI$Xylopia.macrantha
+sp_h <- BCI$Drypetes.standleyi
+```
+```{R one pred species}
+abu_lm <- gls(resp_sp ~ sp_a , data= BCI_xy)
+plot(Variogram(abu_lm, form= ~ x + y))
+
+```
+
+```{r}
+abus_lm <- gls(resp_sp ~ sp_a + sp_b + sp_c + sp_d + sp_e + sp_f + sp_g, 
+data= BCI_xy)
+plot(Variogram(abus_lm, form= ~ x + y))
 ```
 Note renaming the species ids to something a little easier to work with like
 "sp_a", "sp_b" will make model construction a little less cumbersome
 
 * Model 1: only include a single species as a predictor variable
+
 
 * Model 2: include all of the species as predictor variables
 
@@ -94,5 +137,10 @@ of the model?
 
 * Did including the spatial error terms significantly improve model fit (use 
 function `anova` to carry out model comparison)?
+```{rsignificance anova}
+anova(abus_lm)
+```
+-Observing all of the p-values through an anova test, we can find which variables are significant. Every P value can be seen as being under 0.05 which means that all the P values state to reject the NULL hypothesis. The anova test yielded a more significant result than the graphs did because they failed to yield any significance in such a specific and clear way as the table did considering spatial error.
 
 * Explain why you did or did not observe a difference in the influence of adding the spatial error term between the two models.
+- The 
